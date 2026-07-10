@@ -1,0 +1,16 @@
+[server]
+# The polling-based/inotify file watcher is a documented native-crash
+# (segfault) trigger on constrained cloud containers, and it's pointless
+# for a deployed app anyway (no local edits to hot-reload in production).
+fileWatcherType = "none"
+headless = true
+runOnSave = false
+
+[browser]
+gatherUsageStats = false
+
+[client]
+showErrorDetails = true
+
+[logger]
+level = "info"

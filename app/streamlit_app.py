@@ -27,7 +27,15 @@ import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
 import streamlit as st
+import threadpoolctl
 from scipy.stats import norm
+
+# Belt-and-suspenders alongside the OMP/OPENBLAS/MKL env vars above: those only
+# take effect if set *before* numpy/scipy first load their BLAS library, which
+# we cannot fully guarantee (Streamlit's own bootstrap may import numpy/pandas
+# before this script runs). threadpoolctl patches already-loaded BLAS/OpenMP
+# libraries directly, so it works regardless of import order.
+threadpoolctl.threadpool_limits(limits=1)
 
 from src import config
 from src.data_loader import load_clean_dataset
