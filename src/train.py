@@ -113,7 +113,7 @@ def ets_forecast(train: pd.Series, horizon: int):
 
 
 def rf_forecast(X_train, y_train, x_origin) -> tuple[float, float, float]:
-    model = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=-1)
+    model = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=1)
     model.fit(X_train, y_train)
     tree_preds = np.array([t.predict(x_origin.reshape(1, -1))[0] for t in model.estimators_])
     return float(tree_preds.mean()), float(np.percentile(tree_preds, 2.5)), float(np.percentile(tree_preds, 97.5))
@@ -261,7 +261,7 @@ def fit_final_model(df: pd.DataFrame, target_col: str, best_model_name: str, hor
             X_train = ml_train[feature_cols].values
             y_train = ml_train[target_h_col].values
             if best_model_name == "RandomForest":
-                m = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=-1)
+                m = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=1)
             else:
                 m = GradientBoostingRegressor(n_estimators=300, max_depth=3, learning_rate=0.05, random_state=config.RANDOM_STATE)
             m.fit(X_train, y_train)

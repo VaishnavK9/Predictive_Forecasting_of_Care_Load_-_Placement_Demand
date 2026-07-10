@@ -4,6 +4,15 @@ Run with: streamlit run app/streamlit_app.py
 """
 from __future__ import annotations
 
+import os
+
+# Must be set before numpy/scipy load their BLAS backend. Threaded BLAS combined
+# with joblib's fork()-based multiprocessing is a known native-crash (segfault)
+# trigger on constrained single-core containers such as Streamlit Community Cloud.
+os.environ.setdefault("OMP_NUM_THREADS", "1")
+os.environ.setdefault("OPENBLAS_NUM_THREADS", "1")
+os.environ.setdefault("MKL_NUM_THREADS", "1")
+
 import json
 import sys
 import warnings

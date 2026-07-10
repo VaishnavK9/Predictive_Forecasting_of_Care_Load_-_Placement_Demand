@@ -110,7 +110,10 @@ def _ml_forecast(df: pd.DataFrame, target_col: str, model_name: str, horizons: l
         y_train = ml_train[target_h_col].values
 
         if model_name == "RandomForest":
-            model = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=-1)
+            # n_jobs=1: multiprocess fork() combined with threaded BLAS is a known
+            # segfault trigger on constrained/shared cloud containers (e.g. Streamlit
+            # Community Cloud's single-core instances).
+            model = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=1)
             model.fit(X_train, y_train)
             tree_preds = np.array([t.predict(x_origin.reshape(1, -1))[0] for t in model.estimators_])
             means.append(float(tree_preds.mean()))
