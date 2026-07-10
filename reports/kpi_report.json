@@ -1,0 +1,36 @@
+{
+  "Children in HHS Care": {
+    "best_model": "RandomForest",
+    "forecast_accuracy_pct": 99.2,
+    "mape_pct": 0.8,
+    "forecast_stability_index_by_horizon_pct": {
+      "1": 0.61,
+      "7": 0.37,
+      "14": 1.09
+    },
+    "surge_definition": ">= 1.15x trailing 30-obs baseline",
+    "n_surge_events_detected_in_test_folds": 0,
+    "avg_surge_lead_time_reporting_days": null,
+    "avg_surge_lead_time_calendar_days": null,
+    "capacity_threshold": 9000,
+    "mean_capacity_breach_probability_pct": 0.0,
+    "note": "Test folds fall in a 2025 low-load regime (~2,000-2,600) far below the historical peak-era capacity ceiling of 9000; breach probability against that absolute ceiling is expected to be ~0% in this window. Surge lead time uses a relative, trailing-baseline definition so it remains informative even when the absolute level is low."
+  },
+  "Children discharged from HHS Care": {
+    "best_model": "RandomForest",
+    "forecast_accuracy_pct": 71.0,
+    "mape_pct": 29.0,
+    "forecast_stability_index_by_horizon_pct": {
+      "1": 19.81,
+      "7": 11.65,
+      "14": 32.98
+    },
+    "surge_definition": ">= 1.15x trailing 30-obs baseline",
+    "n_surge_events_detected_in_test_folds": 1,
+    "avg_surge_lead_time_reporting_days": 7.0,
+    "avg_surge_lead_time_calendar_days": 9.8,
+    "capacity_threshold": 9000,
+    "mean_capacity_breach_probability_pct": 0.0,
+    "note": "Test folds fall in a 2025 low-load regime (~2,000-2,600) far below the historical peak-era capacity ceiling of 9000; breach probability against that absolute ceiling is expected to be ~0% in this window. Surge lead time uses a relative, trailing-baseline definition so it remains informative even when the absolute level is low."
+  }
+}

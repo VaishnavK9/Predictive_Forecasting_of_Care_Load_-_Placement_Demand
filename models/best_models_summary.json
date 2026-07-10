@@ -1,0 +1,67 @@
+{
+  "Children in HHS Care": {
+    "target": "Children in HHS Care",
+    "best_model": "RandomForest",
+    "train_rows": 613,
+    "trained_through": "2025-05-19",
+    "random_state": 42,
+    "horizons": [
+      1,
+      7,
+      14
+    ],
+    "feature_columns": [
+      "Children in HHS Care_lag1",
+      "Children in HHS Care_lag7",
+      "Children in HHS Care_lag14",
+      "Children in HHS Care_rollmean7",
+      "Children in HHS Care_rollvar7",
+      "Children in HHS Care_rollmean14",
+      "Children in HHS Care_rollvar14",
+      "Children discharged from HHS Care_lag1",
+      "Children discharged from HHS Care_lag7",
+      "Children discharged from HHS Care_lag14",
+      "Children discharged from HHS Care_rollmean7",
+      "Children discharged from HHS Care_rollvar7",
+      "Children discharged from HHS Care_rollmean14",
+      "Children discharged from HHS Care_rollvar14",
+      "net_flow_pressure_lag1",
+      "net_flow_pressure_lag7",
+      "net_flow_pressure_lag14",
+      "day_of_week",
+      "month",
+      "is_holiday",
+      "is_holiday_week"
+    ],
+    "model_type": "per_horizon_dict"
+  },
+  "Children discharged from HHS Care": {
+    "target": "Children discharged from HHS Care",
+    "best_model": "RandomForest",
+    "train_rows": 613,
+    "trained_through": "2025-05-19",
+    "random_state": 42,
+    "horizons": [
+      1,
+      7,
+      14
+    ],
+    "feature_columns": [
+      "Children discharged from HHS Care_lag1",
+      "Children discharged from HHS Care_lag7",
+      "Children discharged from HHS Care_lag14",
+      "Children discharged from HHS Care_rollmean7",
+      "Children discharged from HHS Care_rollvar7",
+      "Children discharged from HHS Care_rollmean14",
+      "Children discharged from HHS Care_rollvar14",
+      "net_flow_pressure_lag1",
+      "net_flow_pressure_lag7",
+      "net_flow_pressure_lag14",
+      "day_of_week",
+      "month",
+      "is_holiday",
+      "is_holiday_week"
+    ],
+    "model_type": "per_horizon_dict"
+  }
+}

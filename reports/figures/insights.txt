@@ -1,0 +1,7 @@
+01_all_series_over_time.png: Children in HHS Care shows a long decline from ~11k (early 2023) to ~2.4k (late 2025), punctuated by sharp surges (e.g. Jan 2025) tied to intake spikes.
+02_stl_decomposition.png: Trend dominates variance; weekly seasonal amplitude is only ~404 children (small vs. level), confirming surges are trend/shock-driven, not calendar-driven.
+03_acf_pacf.png: Level series shows slow-decaying ACF (strong non-stationary trend); differencing removes most autocorrelation, supporting an I(1)/ARIMA(p,1,q) style specification.
+04_rolling_mean_variance.png: Rolling variance spikes sharply during surge periods (e.g. early 2025), confirming heteroskedasticity -- prediction intervals should widen during high-volatility regimes.
+05_flow_distributions.png: Flow columns (apprehensions, transfers, discharges) are right-skewed with heavy tails, reflecting occasional high-volume intake/discharge days.
+06_correlation_heatmap.png: Net flow pressure correlates -0.48 with care load level, confirming it is a useful leading pressure signal.
+07_surge_periods.png: 78 reporting days flagged as surge weeks (week-over-week jump >= 365); surges cluster in Dec 2023-Jan 2024 and Jan-Feb 2025, both winter/policy-driven periods.
