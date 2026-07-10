@@ -12,6 +12,8 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 warnings.filterwarnings("ignore")
 
+import matplotlib
+matplotlib.use("Agg")  # headless/non-interactive backend -- required on Streamlit Cloud's server (no display)
 import matplotlib.pyplot as plt
 import numpy as np
 import pandas as pd
