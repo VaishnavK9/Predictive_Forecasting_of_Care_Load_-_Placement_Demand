@@ -1,11 +1,20 @@
-numpy==2.1.3
-pandas==2.2.3
-scikit-learn==1.5.2
-statsmodels==0.14.4
-matplotlib==3.9.2
+# Deliberately on the numpy 1.x line, not 2.x. numpy 2.0 introduced a breaking
+# C-API/ABI change; even though scikit-learn/scipy/statsmodels all officially
+# support numpy 2.x, that ecosystem transition is still relatively new and is
+# a plausible source of a native crash (segfault) at import time that would
+# never reproduce on a different local machine/OS. We only moved to numpy 2.x
+# originally to get a prebuilt wheel for Python 3.13; now that Python is
+# pinned to 3.11 (see .python-version), that constraint no longer applies, and
+# the numpy 1.26.x stack below is a combination with years of mutual
+# production battle-testing across pandas/scikit-learn/scipy/statsmodels.
+numpy==1.26.4
+pandas==2.2.2
+scikit-learn==1.4.2
+statsmodels==0.14.2
+matplotlib==3.8.4
 seaborn==0.13.2
-streamlit==1.39.0
+streamlit==1.37.1
 joblib==1.4.2
-holidays==0.57
-scipy==1.14.1
-threadpoolctl==3.6.0
+holidays==0.53
+scipy==1.13.1
+threadpoolctl==3.5.0
