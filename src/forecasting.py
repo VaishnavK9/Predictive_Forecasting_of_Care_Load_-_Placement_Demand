@@ -8,6 +8,8 @@ to do, and adds an optional scenario shock for what-if analysis.
 """
 from __future__ import annotations
 
+import gc
+
 import numpy as np
 import pandas as pd
 from sklearn.ensemble import GradientBoostingRegressor, RandomForestRegressor
@@ -27,6 +29,15 @@ from src.train import (
 
 MODEL_NAMES = ["naive_persistence", "moving_average", "SARIMA", "ETS", "RandomForest", "GradientBoosting"]
 STAT_MODELS = {"naive_persistence", "moving_average", "SARIMA", "ETS"}
+
+# Live dashboard forecasts refit a fresh model per horizon on every interaction
+# (unlike src/train.py's one-time offline walk-forward validation), so we use
+# lighter hyperparameters here specifically to keep peak memory/CPU low on
+# constrained deployment containers. This does not change the validated
+# walk-forward accuracy numbers reported elsewhere, only the live-forecast path.
+LIVE_RF_N_ESTIMATORS = 100
+LIVE_GBM_N_ESTIMATORS = 100
+LIVE_GBM_QUANTILE_N_ESTIMATORS = 60
 
 
 def future_reporting_index(last_date: pd.Timestamp, n_steps: int) -> pd.DatetimeIndex:
@@ -78,6 +89,7 @@ def _stat_model_path(series: pd.Series, model_name: str, max_h: int):
         means = fc.predicted_mean.tolist()
         ci = fc.conf_int(alpha=0.05)
         lowers, uppers = ci.iloc[:, 0].tolist(), ci.iloc[:, 1].tolist()
+        del fitted, fc
     elif model_name == "ETS":
         fitted = ExponentialSmoothing(
             series, trend="add", damped_trend=True, seasonal="add",
@@ -88,11 +100,14 @@ def _stat_model_path(series: pd.Series, model_name: str, max_h: int):
             sims = fitted.simulate(nsimulations=max_h, repetitions=N_CI_SIMULATIONS, error="add")
             lowers = np.percentile(sims.values, 2.5, axis=1).tolist()
             uppers = np.percentile(sims.values, 97.5, axis=1).tolist()
+            del sims
         except Exception:
             lowers = [np.nan] * max_h
             uppers = [np.nan] * max_h
+        del fitted
     else:
         raise ValueError(f"Unknown statistical model: {model_name}")
+    gc.collect()
     return means, lowers, uppers
 
 
@@ -113,26 +128,40 @@ def _ml_forecast(df: pd.DataFrame, target_col: str, model_name: str, horizons: l
             # n_jobs=1: multiprocess fork() combined with threaded BLAS is a known
             # segfault trigger on constrained/shared cloud containers (e.g. Streamlit
             # Community Cloud's single-core instances).
-            model = RandomForestRegressor(n_estimators=300, max_depth=6, random_state=config.RANDOM_STATE, n_jobs=1)
+            model = RandomForestRegressor(n_estimators=LIVE_RF_N_ESTIMATORS, max_depth=6,
+                                           random_state=config.RANDOM_STATE, n_jobs=1)
             model.fit(X_train, y_train)
             tree_preds = np.array([t.predict(x_origin.reshape(1, -1))[0] for t in model.estimators_])
             means.append(float(tree_preds.mean()))
             lowers.append(float(np.percentile(tree_preds, 2.5)))
             uppers.append(float(np.percentile(tree_preds, 97.5)))
+            del model, tree_preds
         elif model_name == "GradientBoosting":
-            model = GradientBoostingRegressor(n_estimators=300, max_depth=3, learning_rate=0.05, random_state=config.RANDOM_STATE)
+            model = GradientBoostingRegressor(n_estimators=LIVE_GBM_N_ESTIMATORS, max_depth=3,
+                                               learning_rate=0.05, random_state=config.RANDOM_STATE)
             model.fit(X_train, y_train)
             means.append(float(model.predict(x_origin.reshape(1, -1))[0]))
-            lo_model = GradientBoostingRegressor(loss="quantile", alpha=0.025, n_estimators=300, max_depth=3,
-                                                  learning_rate=0.05, random_state=config.RANDOM_STATE)
-            hi_model = GradientBoostingRegressor(loss="quantile", alpha=0.975, n_estimators=300, max_depth=3,
-                                                  learning_rate=0.05, random_state=config.RANDOM_STATE)
+            del model
+
+            lo_model = GradientBoostingRegressor(loss="quantile", alpha=0.025, n_estimators=LIVE_GBM_QUANTILE_N_ESTIMATORS,
+                                                  max_depth=3, learning_rate=0.05, random_state=config.RANDOM_STATE)
             lo_model.fit(X_train, y_train)
-            hi_model.fit(X_train, y_train)
             lowers.append(float(lo_model.predict(x_origin.reshape(1, -1))[0]))
+            del lo_model
+
+            hi_model = GradientBoostingRegressor(loss="quantile", alpha=0.975, n_estimators=LIVE_GBM_QUANTILE_N_ESTIMATORS,
+                                                  max_depth=3, learning_rate=0.05, random_state=config.RANDOM_STATE)
+            hi_model.fit(X_train, y_train)
             uppers.append(float(hi_model.predict(x_origin.reshape(1, -1))[0]))
+            del hi_model
         else:
             raise ValueError(f"Unknown ML model: {model_name}")
+
+        # Release each horizon's fitted model(s) before building the next --
+        # matters on memory-constrained deployment containers where several
+        # hundred trees/boosting-stages accumulating across horizons can be
+        # the difference between fitting comfortably and being OOM-killed.
+        gc.collect()
 
     return means, lowers, uppers
 
